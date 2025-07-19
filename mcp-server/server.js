@@ -169,6 +169,54 @@ const mcpTools = {
     }
   },
   
+  // Delete patient
+  deletePatient: {
+    name: "delete_patient",
+    description: "Remove a patient from the triage system",
+    inputSchema: {
+      type: "object",
+      properties: {
+        patientId: { type: "string", description: "Patient's unique ID" }
+      },
+      required: ["patientId"]
+    }
+  },
+  
+  // Update patient
+  updatePatient: {
+    name: "update_patient",
+    description: "Update patient information (name, age, condition, severity, etc.)",
+    inputSchema: {
+      type: "object",
+      properties: {
+        patientId: { type: "string", description: "Patient's unique ID" },
+        updates: {
+          type: "object",
+          properties: {
+            name: { type: "string", description: "Patient's full name" },
+            age: { type: "number", description: "Patient's age in years" },
+            condition: { type: "string", description: "Medical condition or symptoms" },
+            severity: { 
+              type: "string", 
+              enum: ["critical", "high", "medium", "low"],
+              description: "Medical severity assessment" 
+            },
+            vitalSigns: {
+              type: "object",
+              properties: {
+                heartRate: { type: "number" },
+                bloodPressure: { type: "string" },
+                oxygenSaturation: { type: "number" },
+                temperature: { type: "number" }
+              }
+            }
+          }
+        }
+      },
+      required: ["patientId", "updates"]
+    }
+  },
+  
   // Get analytics
   getAnalytics: {
     name: "get_analytics",
@@ -276,6 +324,43 @@ async function executeTool(toolName, args) {
       updateAnalytics();
       return { analytics };
       
+    case 'delete_patient':
+      const deleteIndex = patients.findIndex(p => p.id === args.patientId);
+      if (deleteIndex === -1) {
+        return { success: false, message: 'Patient not found' };
+      }
+      
+      const deletedPatient = patients.splice(deleteIndex, 1)[0];
+      updateAnalytics();
+      
+      return { 
+        success: true, 
+        patient: deletedPatient,
+        message: `Patient ${deletedPatient.name} removed from system` 
+      };
+      
+    case 'update_patient':
+      const updateIndex = patients.findIndex(p => p.id === args.patientId);
+      if (updateIndex === -1) {
+        return { success: false, message: 'Patient not found' };
+      }
+      
+      // Update patient with provided fields
+      const updatedPatient = { 
+        ...patients[updateIndex], 
+        ...args.updates,
+        id: patients[updateIndex].id // Preserve original ID
+      };
+      
+      patients[updateIndex] = updatedPatient;
+      updateAnalytics();
+      
+      return { 
+        success: true, 
+        patient: updatedPatient,
+        message: `Patient ${updatedPatient.name} updated successfully` 
+      };
+      
     case 'calculate_priority':
       const calculatedPriority = calculatePriority(
         args.severity, 
@@ -318,6 +403,29 @@ app.put('/api/patients/:id/status', async (req, res) => {
     const result = await executeTool('update_patient_status', {
       patientId: req.params.id,
       status: req.body.status
+    });
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/patients/:id', async (req, res) => {
+  try {
+    const result = await executeTool('delete_patient', {
+      patientId: req.params.id
+    });
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/patients/:id', async (req, res) => {
+  try {
+    const result = await executeTool('update_patient', {
+      patientId: req.params.id,
+      updates: req.body
     });
     res.json(result);
   } catch (error) {
@@ -371,12 +479,15 @@ app.get('/health', (req, res) => {
 const server = app.listen(port, () => {
   console.log(`🏥 Triage MCP Server running on port ${port}`);
   console.log(`📊 Available endpoints:`);
-  console.log(`   - GET  /api/patients - Get all patients`);
-  console.log(`   - POST /api/patients - Add new patient`);
-  console.log(`   - GET  /api/analytics - Get analytics`);
-  console.log(`   - POST /api/calculate-priority - Calculate priority`);
-  console.log(`   - GET  /mcp/tools - List available MCP tools`);
-  console.log(`   - POST /mcp/call - Execute MCP tool`);
+  console.log(`   - GET    /api/patients - Get all patients`);
+  console.log(`   - POST   /api/patients - Add new patient`);
+  console.log(`   - PUT    /api/patients/:id - Update patient`);
+  console.log(`   - DELETE /api/patients/:id - Delete patient`);
+  console.log(`   - PUT    /api/patients/:id/status - Update patient status`);
+  console.log(`   - GET    /api/analytics - Get analytics`);
+  console.log(`   - POST   /api/calculate-priority - Calculate priority`);
+  console.log(`   - GET    /mcp/tools - List available MCP tools`);
+  console.log(`   - POST   /mcp/call - Execute MCP tool`);
 });
 
 // WebSocket server for real-time updates

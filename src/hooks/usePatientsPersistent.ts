@@ -5,42 +5,6 @@ import { Patient } from '../types/patient';
 export const usePatientsPersistent = () => {
   const store = usePatientStore();
 
-  // Sync with server on mount (optional - you can implement server sync here)
-  useEffect(() => {
-    // If you want to sync with your MCP server on load, you can add that logic here
-    // For example:
-    // syncWithServer();
-  }, []);
-
-  const addPatient = useCallback(async (patient: Patient) => {
-    try {
-      // Add to local store immediately for optimistic updates
-      store.addPatient(patient);
-      console.log('Patient added to persistent store:', patient);
-    } catch (error) {
-      console.error('Failed to add patient locally:', error);
-    }
-  }, [store]);
-
-  const updatePatient = useCallback(async (patientId: string, updates: Partial<Patient>) => {
-    try {
-      // Update local store immediately
-      store.updatePatient(patientId, updates);
-      console.log('Patient updated in persistent store:', patientId, updates);
-    } catch (error) {
-      console.error('Failed to update patient locally:', error);
-    }
-  }, [store]);
-
-  const removePatient = useCallback(async (patientId: string) => {
-    try {
-      store.removePatient(patientId);
-      console.log('Patient removed from persistent store:', patientId);
-    } catch (error) {
-      console.error('Failed to remove patient:', error);
-    }
-  }, [store]);
-
   const syncWithServer = useCallback(async () => {
     try {
       // Fetch patients from your MCP server
@@ -57,7 +21,32 @@ export const usePatientsPersistent = () => {
     }
   }, [store]);
 
-  const addPatientWithSync = useCallback(async (patient: Patient) => {
+  // Sync with server on mount - use a separate effect without syncWithServer dependency
+  useEffect(() => {
+    const initialSync = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/api/patients');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.patients) {
+            store.setPatients(data.patients);
+            console.log('Initial sync with server:', data.patients.length, 'patients');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to do initial sync with server:', error);
+      }
+    };
+    
+    initialSync();
+  }, [store]);
+  
+    // PROBLEMATIC CODE: (DO NOT DELETE THIS: THIS IS FOR FUTURE REFERENCE. THIS IS SO THAT YOU DO NOT REPEAT THIS IN THE FUTURE. THIS CAUSES INFINITE LOOP)
+  // useEffect(() => {
+  //   syncWithServer();
+  // }, [syncWithServer]); // ❌ This creates an infinite loop
+
+  const addPatient = useCallback(async (patient: Patient) => {
     try {
       // Add to local store immediately for optimistic updates
       store.addPatient(patient);
@@ -71,33 +60,101 @@ export const usePatientsPersistent = () => {
       
       if (response.ok) {
         console.log('Patient synced with server:', patient);
+        // Refresh from server to get server-assigned data (direct call, not memoized function)
+        const refreshResponse = await fetch('http://localhost:3001/api/patients');
+        if (refreshResponse.ok) {
+          const data = await refreshResponse.json();
+          if (data.patients) {
+            store.setPatients(data.patients);
+          }
+        }
       } else {
-        console.warn('Failed to sync patient with server, but stored locally');
+        console.warn('Failed to sync patient with server, reverting local changes');
+        store.removePatient(patient.id);
       }
     } catch (error) {
-      console.error('Failed to sync with server, but patient stored locally:', error);
+      console.error('Failed to sync with server, reverting local changes:', error);
+      store.removePatient(patient.id);
     }
   }, [store]);
 
-  const updatePatientWithSync = useCallback(async (patientId: string, updates: Partial<Patient>) => {
+  const updatePatient = useCallback(async (patientId: string, updates: Partial<Patient>) => {
     try {
-      // Update local store immediately
+      // Store original patient for potential rollback
+      const originalPatient = store.patients.find(p => p.id === patientId);
+      
+      // Update local store immediately for optimistic updates
       store.updatePatient(patientId, updates);
       
-      // Sync with MCP server if it's a status update
-      if (updates.status) {
-        const response = await fetch(`http://localhost:3001/api/patients/${patientId}/status`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: updates.status }),
-        });
-        
-        if (response.ok) {
-          console.log('Patient status synced with server:', patientId, updates.status);
+      // Sync with MCP server
+      const response = await fetch(`http://localhost:3001/api/patients/${patientId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      
+      if (response.ok) {
+        console.log('Patient updated on server:', patientId, updates);
+        // Refresh from server to get updated data (direct call, not memoized function)
+        const refreshResponse = await fetch('http://localhost:3001/api/patients');
+        if (refreshResponse.ok) {
+          const data = await refreshResponse.json();
+          if (data.patients) {
+            store.setPatients(data.patients);
+          }
+        }
+      } else {
+        console.warn('Failed to sync patient update with server, reverting local changes');
+        if (originalPatient) {
+          store.updatePatient(patientId, originalPatient);
         }
       }
     } catch (error) {
       console.error('Failed to sync patient update with server:', error);
+      // Revert local changes on error
+      const originalPatient = store.patients.find(p => p.id === patientId);
+      if (originalPatient) {
+        store.updatePatient(patientId, originalPatient);
+      }
+    }
+  }, [store]);
+
+  const removePatient = useCallback(async (patientId: string) => {
+    try {
+      // Store original patient for potential rollback
+      const originalPatient = store.patients.find(p => p.id === patientId);
+      
+      // Remove from local store immediately for optimistic updates
+      store.removePatient(patientId);
+      
+      // Sync with MCP server
+      const response = await fetch(`http://localhost:3001/api/patients/${patientId}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        console.log('Patient removed from server:', patientId);
+        // Refresh from server to ensure consistency (direct call, not memoized function)
+        const refreshResponse = await fetch('http://localhost:3001/api/patients');
+        if (refreshResponse.ok) {
+          const data = await refreshResponse.json();
+          if (data.patients) {
+            store.setPatients(data.patients);
+          }
+        }
+      } else {
+        console.warn('Failed to remove patient from server, reverting local changes');
+        if (originalPatient) {
+          store.addPatient(originalPatient);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to remove patient from server:', error);
+      // Revert local changes on error
+      const originalPatient = store.patients.find(p => p.id === patientId);
+      if (originalPatient) {
+        store.addPatient(originalPatient);
+      }
     }
   }, [store]);
 
@@ -122,10 +179,6 @@ export const usePatientsPersistent = () => {
     removePatient,
     clearAllPatients,
     syncWithServer,
-    
-    // Server-synced actions
-    addPatientWithSync,
-    updatePatientWithSync,
     
     // Direct store actions (for advanced use)
     setPatients: store.setPatients,

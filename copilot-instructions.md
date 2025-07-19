@@ -41,6 +41,92 @@ This is a **Triage Flow Care System** specifically designed for emergency medica
 - **Real-time Processing**: Upload progress tracking and status monitoring
 - **Text Extraction**: Convert handwritten medical documents to searchable text
 
+### 5. Removal of local-mode and addition of updating and deleting patients
+
+1. Removed Local Mode
+File: page.tsx
+Changes:
+Removed the syncMode state and toggle UI
+Simplified the UI to only show server sync button
+All operations now automatically sync with the server
+
+2. Fixed Deletion Bug & Added Delete/Edit Functionality
+- MCP Server Updates (server.js):
+- Added new MCP tools:
+- delete_patient: Remove a patient from the system
+- update_patient: Update patient information (name, age, condition, severity)
+
+Added new REST endpoints:
+
+- DELETE /api/patients/:id - Delete a patient
+- PUT /api/patients/:id - Update patient information
+
+Updated server logs to show all available endpoints:
+
+-Hook Updates (usePatientsPersistent.ts):
+- Completely refactored to use server-first approach
+
+All operations now sync with server:
+- addPatient: Optimistically updates local state, then syncs with server
+- updatePatient: Updates locally, syncs with server, refreshes from server
+- removePatient: Removes locally, syncs with server, refreshes from server
+- Added error handling: If server sync fails, local changes are reverted
+- Auto-sync on mount: App automatically syncs with server when it loads
+
+UI Updates (PatientQueue.tsx):
+- Added edit functionality:
+- Click "Edit" button to enter edit mode
+- Inline form with fields for name, age, condition, and severity
+- Save/Cancel buttons for edit operations
+
+Added delete functionality:
+- Delete button with confirmation dialog
+- Optimistic deletion with server sync
+Enhanced status management:
+- Dropdown to change patient status (waiting, in-treatment, completed)
+- Immediate sync with server when status changes
+
+Improved UI:
+- Better button styling
+- Clear visual feedback for edit mode
+- Responsive design
+3. Key Improvements Made:
+- Server-First Architecture: Everything now syncs with the MCP server immediately
+- Optimistic Updates: UI updates immediately for better user experience, but reverts if server sync fails
+- Error Handling: Robust error handling with fallback to local state if server is unavailable
+- Consistent State: Analytics page will now always show accurate data because everything syncs through the server
+- Better UX: Users can edit any patient field and delete patients with confirmation
+
+4. How the Fixed System Works
+Adding a Patient:
+
+Form submission immediately adds to local state:
+- Sends to server, gets server response
+- Refreshes from server to ensure consistency
+- Editing a Patient:
+
+Click edit button to enter edit mode: 
+- Make changes in inline form
+- Save sends updates to server and refreshes data
+
+Deleting a Patient:
+
+- Click delete with confirmation
+- Optimistically removes from UI
+- Syncs deletion with server
+- If deletion fails, patient is restored to UI
+
+Status Updates:
+
+- Use dropdown to change status
+- Immediately syncs with server
+
+Analytics Consistency:
+
+Since all operations go through the server, analytics page always shows current data
+HOPEFULLY no more sync issues between triage and analytics pages
+Please fix if there are any remaining inconsistencies or and issues
+
 ## Key Components
 
 ### Core Pages
@@ -96,6 +182,32 @@ interface Patient {
 - **Location**: `mcp-server/` directory
 - **Purpose**: Model Context Protocol server for enhanced AI capabilities
 - **Files**: `server.js`, `client.js`, and configuration
+
+## Infinite loops and such
+// ❌ Had syncWithServer in dependency array
+const addPatient = useCallback(async (patient: Patient) => {
+  // ... add logic ...
+  await syncWithServer(); // ❌ Called memoized function
+}, [store, syncWithServer]); // ❌ Dependency on syncWithServer
+
+always do [store] in the dependency array, but never [syncWithServer] or any other function that is memoized
+
+After (fixed):
+
+// ✅ Only depends on store
+const addPatient = useCallback(async (patient: Patient) => {
+  // ... add logic ...
+  // ✅ Direct fetch call instead of memoized function
+  const refreshResponse = await fetch('http://localhost:3001/api/patients');
+  if (refreshResponse.ok) {
+    const data = await refreshResponse.json();
+    if (data.patients) {
+      store.setPatients(data.patients);
+    }
+  }
+}, [store]); // ✅ Only depends on stable store
+
+
 
 ## Running the Application
 ```bash
