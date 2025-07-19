@@ -1,19 +1,25 @@
 'use client';
 
 import React from 'react';
-import usePatients from '../../hooks/usePatients';
+import { usePatientsPersistent } from '../../hooks/usePatientsPersistent';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 
 export default function DashboardPage() {
-  const { patients } = usePatients();
+  const { 
+    patients, 
+    waitingPatients, 
+    inTreatmentPatients, 
+    completedPatients,
+    lastUpdated 
+  } = usePatientsPersistent();
 
   const stats = {
     total: patients.length,
     critical: patients.filter(p => p.severity === 'critical').length,
     high: patients.filter(p => p.severity === 'high').length,
-    waiting: patients.filter(p => p.status === 'waiting').length,
-    inTreatment: patients.filter(p => p.status === 'in-treatment').length,
+    waiting: waitingPatients.length,
+    inTreatment: inTreatmentPatients.length,
   };
 
   return (
@@ -22,6 +28,11 @@ export default function DashboardPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-primary-900 mb-2">Dashboard Overview</h1>
           <p className="text-primary-700">Real-time patient management and system insights</p>
+          {lastUpdated && (
+            <p className="text-sm text-primary-600 mt-2">
+              📂 Data persisted • Last updated: {new Date(lastUpdated).toLocaleString()}
+            </p>
+          )}
         </div>
 
         {/* Quick Action Bar */}

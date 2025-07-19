@@ -1,4 +1,4 @@
-// File: C:\flow-care\src\app\image-scanner\page.tsx
+// File: /Users/aliciayu/flow-care/src/app/image-scanner/page.tsx
 import * as entry from '../../../../src/app/image-scanner/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
