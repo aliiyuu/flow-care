@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-color: #14b8a6; /* Soft Teal */
+  --primary-light: #5eead4; /* Light Teal */
+  --primary-dark: #0f766e; /* Dark Teal */
+  --secondary-color: #06b6d4; /* Cyan */
+  --accent-color: #10b981; /* Emerald */
+  --background-color: #f0fdfa; /* Very Light Teal */
+  --surface-color: #ffffff; /* White */
+  --text-color: #134e4a; /* Dark Teal Text */
+  --text-secondary: #6b7280; /* Gray Text */
+  --border-color: #a7f3d0; /* Light Teal Border */
+  --border-light: #e6fffa; /* Very Light Teal Border */
+  --error-color: #ef4444; /* Red for errors */
+  --warning-color: #f59e0b; /* Amber for warnings */
+  --success-color: #10b981; /* Green for success */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Lexend will be applied globally through the layout className */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-color);
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--primary-dark);
+}
+
+button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-family: 'Lexend', system-ui, sans-serif;
+  letter-spacing: 0.025em;
+}
+
+button:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  background-color: var(--text-secondary);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.grid {
+  display: grid;
+  gap: 20px;
+}
+
+.flex {
+  display: flex;
+  gap: 20px;
+}
+
+.card {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px -1px rgba(20, 184, 166, 0.1), 0 2px 4px -1px rgba(20, 184, 166, 0.06);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 10px 15px -3px rgba(20, 184, 166, 0.1), 0 4px 6px -2px rgba(20, 184, 166, 0.05);
+  border-color: var(--border-color);
+}
+
+/* Teal-themed form elements */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
+}
+
+/* Teal-themed badges and status indicators */
+.badge-critical {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.badge-high {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.badge-medium {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border-color: var(--border-color);
+}
+
+.badge-low {
+  background-color: #f0f9ff;
+  color: #0c4a6e;
+  border-color: #bae6fd;
+}
