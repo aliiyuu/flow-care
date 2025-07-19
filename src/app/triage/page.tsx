@@ -1,27 +1,46 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import PatientForm from '../../components/PatientForm';
 import PatientQueue from '../../components/PatientQueue';
 import { Patient } from '../../types/patient';
 import { usePatientsPersistent } from '../../hooks/usePatientsPersistent';
 
 export default function TriagePage() {
+  const [hasHydrated, setHasHydrated] = useState(false);
+  const [syncMode, setSyncMode] = useState(false); // Toggle for server sync
+  
   const {
     sortedPatients: patients,
-    addPatientWithSync: addPatient,
-    updatePatientWithSync: updatePatient,
+    addPatient, // Use local-only version by default
+    updatePatient, // Use local-only version by default
     lastUpdated,
     clearAllPatients,
     syncWithServer,
+    addPatientWithSync,
+    updatePatientWithSync,
   } = usePatientsPersistent();
+
+  // Wait for hydration to complete
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
 
   const handleAddPatient = (patient: Patient) => {
     console.log('Patient added:', patient);
-    addPatient(patient);
+    if (syncMode) {
+      addPatientWithSync(patient);
+    } else {
+      addPatient(patient);
+    }
   };
 
   const handleUpdatePatient = (patientId: string, updates: Partial<Patient>) => {
-    updatePatient(patientId, updates);
+    if (syncMode) {
+      updatePatientWithSync(patientId, updates);
+    } else {
+      updatePatient(patientId, updates);
+    }
   };
 
   return (
@@ -42,6 +61,20 @@ export default function TriagePage() {
                 Last updated: {new Date(lastUpdated).toLocaleString()}
               </span>
             )}
+            
+            {/* Sync Mode Toggle */}
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={syncMode}
+                onChange={(e) => setSyncMode(e.target.checked)}
+                className="rounded"
+              />
+              <span className={syncMode ? 'text-blue-600' : 'text-gray-600'}>
+                {syncMode ? '🔄 Server Sync Mode' : '💾 Local Mode'}
+              </span>
+            </label>
+            
             <button
               onClick={syncWithServer}
               className="text-sm px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 transition-colors"
@@ -56,7 +89,7 @@ export default function TriagePage() {
             </button>
           </div>
           
-          {patients.length > 0 && (
+          {hasHydrated && patients.length > 0 && (
             <div className="text-sm text-green-600 bg-green-50 px-4 py-2 rounded-lg inline-block">
               📂 {patients.length} patients stored persistently
             </div>
@@ -72,6 +105,7 @@ export default function TriagePage() {
             <PatientQueue 
               patients={patients} 
               onUpdatePatient={handleUpdatePatient}
+              hasHydrated={hasHydrated}
             />
           </div>
         </div>

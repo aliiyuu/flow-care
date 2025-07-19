@@ -69,8 +69,8 @@ const PatientForm: React.FC<PatientFormProps> = ({ onAddPatient }) => {
     <Card
       title="Patient Registration"
       content={
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-6" suppressHydrationWarning>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4" suppressHydrationWarning>
             <Input
               label="Patient Name"
               value={name}
@@ -106,6 +106,7 @@ const PatientForm: React.FC<PatientFormProps> = ({ onAddPatient }) => {
               onChange={(e) => setSeverity(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white font-sans"
               required
+              suppressHydrationWarning
             >
               <option value="critical">🚨 Critical - Immediate life-threatening emergency</option>
               <option value="high">⚠️ High - Urgent care required within 30 minutes</option>

@@ -6,9 +6,14 @@ import { Patient } from '../types/patient';
 interface PatientQueueProps {
   patients: Patient[];
   onUpdatePatient?: (patientId: string, updates: Partial<Patient>) => void;
+  hasHydrated?: boolean;
 }
 
-const PatientQueue: React.FC<PatientQueueProps> = ({ patients, onUpdatePatient }) => {
+const PatientQueue: React.FC<PatientQueueProps> = ({ 
+  patients, 
+  onUpdatePatient, 
+  hasHydrated = true 
+}) => {
   // Sort patients by priority (highest first) and then by arrival time
   const sortedPatients = [...patients].sort((a, b) => {
     if (a.priority !== b.priority) {
@@ -48,10 +53,18 @@ const PatientQueue: React.FC<PatientQueueProps> = ({ patients, onUpdatePatient }
 
   return (
     <Card
-      title={`Patient Queue (${patients.length})`}
+      title={hasHydrated ? `Patient Queue (${patients.length})` : `Patient Queue (...)`}
       content={
         <div className="space-y-3">
-          {sortedPatients.length === 0 ? (
+          {!hasHydrated ? (
+            <div className="text-center py-12 text-gray-500">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-gray-400 text-2xl">⏳</span>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Loading queue...</h3>
+              <p className="text-sm">Retrieving patient data...</p>
+            </div>
+          ) : sortedPatients.length === 0 ? (
             <div className="text-center py-12 text-gray-500">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-gray-400 text-2xl">👥</span>

@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePatientsPersistent } from '../../hooks/usePatientsPersistent';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 
 export default function DashboardPage() {
+  const [hasHydrated, setHasHydrated] = useState(false);
   const { 
     patients, 
     waitingPatients, 
@@ -14,12 +15,17 @@ export default function DashboardPage() {
     lastUpdated 
   } = usePatientsPersistent();
 
+  // Wait for hydration to complete
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
+
   const stats = {
-    total: patients.length,
-    critical: patients.filter(p => p.severity === 'critical').length,
-    high: patients.filter(p => p.severity === 'high').length,
-    waiting: waitingPatients.length,
-    inTreatment: inTreatmentPatients.length,
+    total: hasHydrated ? patients.length : 0,
+    critical: hasHydrated ? patients.filter(p => p.severity === 'critical').length : 0,
+    high: hasHydrated ? patients.filter(p => p.severity === 'high').length : 0,
+    waiting: hasHydrated ? waitingPatients.length : 0,
+    inTreatment: hasHydrated ? inTreatmentPatients.length : 0,
   };
 
   return (

@@ -1188,6 +1188,9 @@ video {
   padding-top: 2rem;
   padding-bottom: 2rem;
 }
+.pt-2 {
+  padding-top: 0.5rem;
+}
 .pt-4 {
   padding-top: 1rem;
 }
@@ -1308,6 +1311,10 @@ video {
 .text-green-800 {
   --tw-text-opacity: 1;
   color: rgb(22 101 52 / var(--tw-text-opacity, 1));
+}
+.text-indigo-600 {
+  --tw-text-opacity: 1;
+  color: rgb(79 70 229 / var(--tw-text-opacity, 1));
 }
 .text-orange-500 {
   --tw-text-opacity: 1;

@@ -7,4 +7,12 @@ export interface Patient {
   priority: number; // Higher numbers indicate higher priority
   arrivalTime: string;
   status: 'waiting' | 'in-treatment' | 'completed';
+  treatmentStartTime?: string; // When treatment begins
+  treatmentEndTime?: string; // When treatment completes
+  vitalSigns?: {
+    heartRate?: number;
+    bloodPressure?: string;
+    oxygenSaturation?: number;
+    temperature?: number;
+  };
 }

@@ -16,20 +16,9 @@ export const usePatientsPersistent = () => {
     try {
       // Add to local store immediately for optimistic updates
       store.addPatient(patient);
-      
-      // Optionally sync with server
-      // You can add API call here to sync with your MCP server
-      // const response = await fetch('/api/patients', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(patient),
-      // });
-      
       console.log('Patient added to persistent store:', patient);
     } catch (error) {
-      console.error('Failed to add patient:', error);
-      // Optionally remove from store if server sync fails
-      // store.removePatient(patient.id);
+      console.error('Failed to add patient locally:', error);
     }
   }, [store]);
 
@@ -37,18 +26,9 @@ export const usePatientsPersistent = () => {
     try {
       // Update local store immediately
       store.updatePatient(patientId, updates);
-      
-      // Optionally sync with server
-      // const response = await fetch(`/api/patients/${patientId}/status`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(updates),
-      // });
-      
       console.log('Patient updated in persistent store:', patientId, updates);
     } catch (error) {
-      console.error('Failed to update patient:', error);
-      // Optionally revert the change if server sync fails
+      console.error('Failed to update patient locally:', error);
     }
   }, [store]);
 
