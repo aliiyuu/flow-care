@@ -5,9 +5,10 @@ import { Patient } from '../types/patient';
 
 interface PatientQueueProps {
   patients: Patient[];
+  onUpdatePatient?: (patientId: string, updates: Partial<Patient>) => void;
 }
 
-const PatientQueue: React.FC<PatientQueueProps> = ({ patients }) => {
+const PatientQueue: React.FC<PatientQueueProps> = ({ patients, onUpdatePatient }) => {
   // Sort patients by priority (highest first) and then by arrival time
   const sortedPatients = [...patients].sort((a, b) => {
     if (a.priority !== b.priority) {
