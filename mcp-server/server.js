@@ -596,6 +596,7 @@ const server = app.listen(port, () => {
   console.log(`   - POST   /api/calculate-priority - Calculate priority`);
   console.log(`   - GET    /mcp/tools - List available MCP tools`);
   console.log(`   - POST   /mcp/call - Execute MCP tool`);
+  console.log(`   - POST   /api/ai/chat - AI chat with context-aware responses`);
 });
 
 // WebSocket server for real-time updates
