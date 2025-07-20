@@ -9,7 +9,8 @@ A Model Context Protocol (MCP) server for the TriageFlow Care system that enable
 - **Live Analytics**: Real-time statistics and insights
 - **WebSocket Support**: Live updates for real-time collaboration
 - **RESTful API**: Standard HTTP endpoints for integration
-- **MCP Protocol**: Direct integration with AI systems following Anthropic's MCP standard
+- **MCP Protocol**: Direct integration with AI systems following the Model Context Protocol standard
+- **Gemini AI**: Powered by Google's Gemini AI for intelligent triage decisions
 
 ## Quick Start
 
@@ -157,9 +158,13 @@ The server uses a sophisticated algorithm to calculate patient priority:
 
 ## Integration with AI Systems
 
-### Claude/Anthropic Integration
+### Gemini AI Integration
 
-Configure Claude to use this MCP server by adding to your MCP settings:
+This server is powered by Google's Gemini AI. Configure your API key in the `.env` file:
+
+```bash
+GEMINI_API_KEY=your_gemini_api_key_here
+```
 
 ```json
 {

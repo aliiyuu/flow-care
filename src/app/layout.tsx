@@ -3,6 +3,7 @@ import React from 'react';
 import { Lexend } from 'next/font/google';
 import { Navbar } from '../components/ui/Navbar';
 import { Footer } from '../components/ui/Footer';
+import AIChatButton from '../components/AIChatButton';
 import './globals.css';
 
 const lexend = Lexend({
@@ -28,6 +29,8 @@ export default function RootLayout({
           <main className="flex-grow">{children}</main>
           <Footer />
         </div>
+        {/* AI Assistant available on all pages */}
+        <AIChatButton />
       </body>
     </html>
   );

@@ -2,6 +2,16 @@ import express from 'express';
 import cors from 'cors';
 import { WebSocketServer } from 'ws';
 import { v4 as uuidv4 } from 'uuid';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables from the parent directory
+dotenv.config({ path: path.join(process.cwd(), '../.env') });
+
+// Initialize Gemini client
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'your-api-key-here');
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // In-memory data store (in production, use a real database)
 let patients = [];
@@ -448,6 +458,104 @@ app.post('/api/calculate-priority', async (req, res) => {
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// AI Chat endpoint
+app.post('/api/ai/chat', async (req, res) => {
+  try {
+    const { message, context } = req.body;
+    
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    // Get current system data for context
+    const currentPatients = await executeTool('get_patients', { status: 'all' });
+    const currentAnalytics = await executeTool('get_analytics', {});
+
+    // Create context-aware prompt with real data
+    let systemPrompt = '';
+    switch (context) {
+      case 'triage_system':
+        systemPrompt = `You are FlowCare AI, an intelligent medical triage assistant. You have access to real-time patient data and can help with:
+- Patient priority assessment
+- Medical condition guidance  
+- Triage decision support
+- Emergency protocols
+- Hospital workflow optimization
+
+CURRENT SYSTEM STATE:
+- Total patients: ${currentAnalytics.analytics.totalPatients}
+- Average priority: ${currentAnalytics.analytics.averagePriority.toFixed(1)}
+- Patients by severity: Critical: ${currentAnalytics.analytics.severityBreakdown.critical}, High: ${currentAnalytics.analytics.severityBreakdown.high}, Medium: ${currentAnalytics.analytics.severityBreakdown.medium}, Low: ${currentAnalytics.analytics.severityBreakdown.low}
+
+You can access real patient data and provide specific insights based on the current system state. When asked about analytics, patients, or system status, use the actual data available.`;
+        break;
+      case 'analytics':
+        systemPrompt = `You are FlowCare AI, a healthcare analytics assistant. You have access to real-time patient data and analytics:
+
+CURRENT ANALYTICS:
+- Total patients: ${currentAnalytics.analytics.totalPatients}
+- Average priority score: ${currentAnalytics.analytics.averagePriority.toFixed(1)}
+- Priority distribution: ${JSON.stringify(currentAnalytics.analytics.priorityDistribution)}
+- Severity breakdown: ${JSON.stringify(currentAnalytics.analytics.severityBreakdown)}
+
+CURRENT PATIENTS: ${JSON.stringify(currentPatients.patients.slice(0, 5))}
+
+Provide insights based on this real data. You can analyze trends, identify bottlenecks, and suggest improvements based on actual patient flow.`;
+        break;
+      default:
+        systemPrompt = `You are FlowCare AI, a helpful assistant for the FlowCare medical triage system. You have access to real-time data:
+- Current patients in system: ${currentAnalytics.analytics.totalPatients}
+- System status: ${currentAnalytics.analytics.totalPatients > 0 ? 'Active with patients' : 'No patients currently'}
+
+You can help with patient management, triage decisions, and provide insights based on actual system data.`;
+    }
+
+    // Detect if user is asking for specific data that requires tool calls
+    const userMessageLower = message.toLowerCase();
+    let additionalContext = '';
+    
+    if (userMessageLower.includes('patient') || userMessageLower.includes('queue') || userMessageLower.includes('triage')) {
+      additionalContext += `\nCURRENT PATIENT QUEUE (sorted by priority):\n${JSON.stringify(currentPatients.patients, null, 2)}`;
+    }
+    
+    if (userMessageLower.includes('analytic') || userMessageLower.includes('data') || userMessageLower.includes('stat')) {
+      additionalContext += `\nDETAILED ANALYTICS:\n${JSON.stringify(currentAnalytics.analytics, null, 2)}`;
+    }
+
+    // Generate AI response using Gemini with real data
+    const chat = model.startChat({
+      history: [
+        {
+          role: "user",
+          parts: [{ text: systemPrompt }],
+        },
+        {
+          role: "model",
+          parts: [{ text: "I understand. I'm FlowCare AI with access to real-time patient data and analytics. I can provide specific insights based on your current system state. How can I help you today?" }],
+        },
+      ],
+    });
+
+    const fullMessage = message + additionalContext;
+    const result = await chat.sendMessage(fullMessage);
+    const response = result.response.text();
+
+    res.json({
+      response,
+      timestamp: new Date().toISOString(),
+      context,
+      dataIncluded: additionalContext.length > 0
+    });
+
+  } catch (error) {
+    console.error('AI Chat Error:', error);
+    res.status(500).json({ 
+      error: 'Failed to process AI request',
+      response: 'I apologize, but I\'m having trouble processing your request right now. Please try again in a moment.'
+    });
   }
 });
 
