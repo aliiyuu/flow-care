@@ -219,13 +219,13 @@ export default function DashboardPage() {
           >
             📄 Export Report
           </Button>
-          <Button 
+          {/* <Button 
             variant="primary"
             onClick={handleExportWithCharts}
             className="bg-blue-600 hover:bg-blue-700"
           >
             📊 Export Dashboard
-          </Button>
+          </Button> */}
         </div>
         </div>
         
