@@ -4,21 +4,49 @@ import React, { useState, useEffect } from 'react';
 import { usePatientsPersistent } from '../../hooks/usePatientsPersistent';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import PatientAddModal from '../../components/PatientAddModal';
 
 export default function DashboardPage() {
   const [hasHydrated, setHasHydrated] = useState(false);
+  const [showAddPatientModal, setShowAddPatientModal] = useState(false);
   const { 
     patients, 
     waitingPatients, 
     inTreatmentPatients, 
     completedPatients,
-    lastUpdated 
+    lastUpdated,
+    syncWithServer
   } = usePatientsPersistent();
 
   // Wait for hydration to complete
   useEffect(() => {
     setHasHydrated(true);
   }, []);
+
+  const handleAddPatient = async (patientData: any) => {
+    try {
+      const response = await fetch('/api/patients', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(patientData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert(`Patient ${patientData.name} added successfully with priority score ${result.patient.priority}`);
+        setShowAddPatientModal(false);
+        // Refresh data
+        syncWithServer();
+      } else {
+        alert('Failed to add patient');
+      }
+    } catch (error) {
+      console.error('Error adding patient:', error);
+      alert('Error adding patient');
+    }
+  };
 
   const stats = {
     total: hasHydrated ? patients.length : 0,
@@ -43,13 +71,25 @@ export default function DashboardPage() {
 
         {/* Quick Action Bar */}
         <div className="mb-8 flex flex-wrap gap-4">
-          <Button variant="primary" size="md">
+          <Button 
+            variant="primary" 
+            size="md"
+            onClick={() => setShowAddPatientModal(true)}
+          >
             Add Patient
           </Button>
-          <Button variant="secondary" size="md">
+          <Button 
+            variant="secondary" 
+            size="md"
+            onClick={() => window.location.href = '/triage'}
+          >
             View Queue
           </Button>
-          <Button variant="outline" size="md">
+          <Button 
+            variant="outline" 
+            size="md"
+            onClick={() => alert('Export functionality coming soon!')}
+          >
             Export Data
           </Button>
         </div>
@@ -103,14 +143,29 @@ export default function DashboardPage() {
           title="Quick Actions"
           content={
             <div className="space-y-4">
-              <Button variant="primary" size="md" className="w-full">
+              <Button 
+                variant="primary" 
+                size="md" 
+                className="w-full"
+                onClick={() => setShowAddPatientModal(true)}
+              >
                 Add New Patient
               </Button>
-              <Button variant="secondary" size="md" className="w-full">
+              <Button 
+                variant="secondary" 
+                size="md" 
+                className="w-full"
+                onClick={() => window.location.href = '/triage'}
+              >
                 View All Patients
               </Button>
-              <Button variant="success" size="md" className="w-full">
-                Generate Report
+              <Button 
+                variant="success" 
+                size="md" 
+                className="w-full"
+                onClick={() => window.location.href = '/analytics'}
+              >
+                View Analytics
               </Button>
             </div>
           }
@@ -141,6 +196,13 @@ export default function DashboardPage() {
         />
       </div>
       </div>
+
+      {/* Patient Add Modal */}
+      <PatientAddModal
+        isOpen={showAddPatientModal}
+        onClose={() => setShowAddPatientModal(false)}
+        onAddPatient={handleAddPatient}
+      />
     </div>
   );
 }

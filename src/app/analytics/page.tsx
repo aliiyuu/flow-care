@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { usePatientsPersistent } from '../../hooks/usePatientsPersistent';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import { exportAnalyticsToPDF, exportAnalyticsWithChartsToPDF } from '../../utils/pdfExport';
 
 export default function AnalyticsPage() {
   const [hasHydrated, setHasHydrated] = useState(false);
@@ -82,6 +83,39 @@ export default function AnalyticsPage() {
 
   const analytics = getAnalytics();
 
+  const handleExportPDF = async () => {
+    const analyticsData = {
+      severityDistribution: analytics.severityDistribution,
+      statusDistribution: analytics.statusDistribution,
+      averageAge: analytics.averageAge,
+      averagePriority: analytics.averagePriority,
+      averageWaitTime: analytics.averageWaitTime,
+      totalPatients: patients.length,
+      completionRate: Math.round((analytics.statusDistribution.completed / Math.max(patients.length, 1)) * 100),
+      highPriorityCases: patients.filter(p => p.priority >= 100).length,
+      waitingPatients: waitingPatients.length,
+      inTreatmentPatients: inTreatmentPatients.length
+    };
+
+    const result = await exportAnalyticsToPDF(analyticsData);
+    
+    if (result.success) {
+      alert(`✅ Report exported successfully as ${result.fileName}`);
+    } else {
+      alert(`❌ Export failed: ${result.error}`);
+    }
+  };
+
+  const handleExportWithCharts = async () => {
+    const result = await exportAnalyticsWithChartsToPDF('analytics-dashboard');
+    
+    if (result.success) {
+      alert(`✅ Dashboard exported successfully as ${result.fileName}`);
+    } else {
+      alert(`❌ Export failed: ${result.error}`);
+    }
+  };
+
   const SeverityChart = () => {
     if (!hasHydrated) return <div className="text-gray-500">Loading...</div>;
     
@@ -148,19 +182,32 @@ export default function AnalyticsPage() {
 
         {/* Action buttons */}
         <div className="mb-8 flex flex-wrap gap-4">
-          <Button variant="primary">
-            Export Report
+          <Button 
+            variant="primary"
+            onClick={handleExportPDF}
+          >
+            📄 Export Report (Data Only)
+          </Button>
+          <Button 
+            variant="primary"
+            onClick={handleExportWithCharts}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            📊 Export Dashboard (With Charts)
           </Button>
           <Button variant="secondary" onClick={syncWithServer}>
-            Sync & Refresh Data
+            🔄 Sync & Refresh Data
           </Button>
-          <Button variant="outline">
-            Configure Alerts
+          <Button 
+            variant="outline"
+            onClick={() => alert('Alert configuration coming soon!')}
+          >
+            ⚠️ Configure Alerts
           </Button>
         </div>
       
         {/* Charts */}
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
+        <div id="analytics-dashboard" className="grid md:grid-cols-2 gap-6 mb-6">
           <Card
             title="Severity Distribution"
             content={<SeverityChart />}
