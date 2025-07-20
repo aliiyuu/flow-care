@@ -30,9 +30,8 @@ To set up the project locally, follow these steps:
 
 ## Project Structure
 
-- **src/app/dashboard/page.tsx**: Displays overall statistics and navigation to other sections of the application.
+- **src/app/dashboard/page.tsx**: Comprehensive dashboard with analytics, patient management, and key metrics visualization.
 - **src/app/triage/page.tsx**: Provides a user interface for inputting patient data and displays the priority queue for triage.
-- **src/app/analytics/page.tsx**: Visualizes analytics and statistics related to patient triage and outcomes.
 - **src/components**: Contains reusable UI components such as buttons, cards, inputs, and modals.
 - **src/lib**: Implements the priority queue data structure and triage algorithms.
 - **src/hooks**: Custom hooks for managing patient data and analytics.
@@ -42,6 +41,9 @@ To set up the project locally, follow these steps:
 
 - User input for patient data including name, condition, and priority.
 - Dynamic display of patient queue and triage order.
+- Comprehensive dashboard with real-time analytics, charts, and key metrics.
+- PDF export functionality for analytics reports and dashboard data.
+- Patient addition via modal popup interface.
 - Visualizations and statistics for better decision-making in disaster relief scenarios.
 
 ## Deployment

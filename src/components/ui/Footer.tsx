@@ -7,7 +7,7 @@ export const Footer: React.FC = () => {
         <div className="text-center">
           <p className="text-sm text-gray-600">&copy; 2025 TriageFlow Care. All rights reserved.</p>
           <p className="text-xs text-gray-500 mt-1">
-            Emergency triage management system for disaster relief
+            Emergency triage management system
           </p>
         </div>
         <div className="mt-4 flex justify-center space-x-4 text-sm text-gray-500">

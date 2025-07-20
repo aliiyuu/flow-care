@@ -130,10 +130,9 @@ Please fix if there are any remaining inconsistencies or and issues
 ## Key Components
 
 ### Core Pages
-- **`/dashboard`**: Overview statistics and system management
+- **`/dashboard`**: Comprehensive dashboard with analytics, patient management, key metrics, and system overview
 - **`/triage`**: Patient registration and priority queue management
 - **`/image-scanner`**: Medical document OCR scanning and transcription
-- **`/analytics`**: Data visualization and reporting
 
 ### Patient Data Structure
 ```typescript

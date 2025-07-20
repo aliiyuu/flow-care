@@ -13,7 +13,7 @@ export default function Home() {
             TriageFlow Care
           </h1>
           <p className="text-xl text-primary-700 max-w-3xl mx-auto leading-relaxed">
-            Advanced emergency triage management system designed for disaster relief scenarios. 
+            Advanced emergency triage management system designed for critical zones. 
             Streamline patient care with intelligent priority algorithms and real-time coordination.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
