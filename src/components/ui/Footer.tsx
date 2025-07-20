@@ -10,6 +10,11 @@ export const Footer: React.FC = () => {
             Emergency triage management system for disaster relief
           </p>
         </div>
+        <div className="mt-4 flex justify-center space-x-4 text-sm text-gray-500">
+          <a href="/legal" className="hover:underline">
+            Legal
+          </a>
+        </div>
       </div>
     </footer>
   );

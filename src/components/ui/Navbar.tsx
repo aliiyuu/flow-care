@@ -28,6 +28,7 @@ export const Navbar: React.FC = () => {
             <Link href="/analytics" className="text-teal-700 hover:text-teal-500 hover:bg-teal-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
               Analytics
             </Link>
+            
           </div>
         </div>
       </div>
