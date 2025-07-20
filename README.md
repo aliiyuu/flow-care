@@ -229,6 +229,5 @@ An AI-powered, web-based triage system that prioritizes patients intelligently, 
 
 - **GitHub:** [aliiyuu/flow-care](https://github.com/aliiyuu/flow-care)
 - **Issues:** [Report bugs or request features](https://github.com/aliiyuu/flow-care/issues)
-- **Documentation:** [Deployment Guide](DEPLOYMENT.md)
 
 ---
