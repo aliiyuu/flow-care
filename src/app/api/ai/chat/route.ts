@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the generative model
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     // Create medical context system prompt
     const systemPrompt = `You are a medical AI assistant for Flow Care, a healthcare triage system. 
