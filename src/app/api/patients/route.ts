@@ -74,18 +74,20 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
     
-    // Generate patient data
+    // Generate patient data with arrival time
+    const now = new Date().toISOString();
     const patient = {
       id: uuidv4(),
       ...data,
+      arrivalTime: now,
       priority: calculatePriority(
         data.severity || 'medium',
         data.condition || '',
         data.age || 30,
         data.vitalSigns || {}
       ),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
       status: 'waiting'
     };
     

@@ -58,6 +58,18 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
     setIsLoading(true);
 
     try {
+      // Fetch current patient data to provide context to AI
+      let patientData = [];
+      try {
+        const patientsResponse = await fetch('/api/patients');
+        if (patientsResponse.ok) {
+          const data = await patientsResponse.json();
+          patientData = data.patients || [];
+        }
+      } catch (error) {
+        console.log('Could not fetch current patients for AI context');
+      }
+
       // Call your Gemini AI endpoint
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
@@ -66,7 +78,8 @@ export default function AIChat({ isOpen, onClose }: AIChatProps) {
         },
         body: JSON.stringify({
           message: userMessage.content,
-          context: 'triage_system' // Add context for the AI
+          context: 'triage_system', // Add context for the AI
+          patientData: patientData // Include current patient data
         }),
       });
 

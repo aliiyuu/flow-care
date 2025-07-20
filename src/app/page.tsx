@@ -83,7 +83,6 @@ export default function Home() {
                 <ul className="text-sm text-primary-600 space-y-1 text-left">
                   <li>• One-click patient entry</li>
                   <li>• Mobile-responsive design</li>
-                  <li>• Offline capabilities</li>
                 </ul>
               </div>
             }
