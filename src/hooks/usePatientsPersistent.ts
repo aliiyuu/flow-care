@@ -7,8 +7,8 @@ export const usePatientsPersistent = () => {
 
   const syncWithServer = useCallback(async () => {
     try {
-      // Fetch patients from your MCP server
-      const response = await fetch('http://localhost:3001/api/patients');
+      // Use internal API routes for single project deployment
+      const response = await fetch('/api/patients');
       if (response.ok) {
         const data = await response.json();
         if (data.patients) {
@@ -25,7 +25,7 @@ export const usePatientsPersistent = () => {
   useEffect(() => {
     const initialSync = async () => {
       try {
-        const response = await fetch('http://localhost:3001/api/patients');
+        const response = await fetch('/api/patients');
         if (response.ok) {
           const data = await response.json();
           if (data.patients) {
@@ -51,8 +51,8 @@ export const usePatientsPersistent = () => {
       // Add to local store immediately for optimistic updates
       store.addPatient(patient);
       
-      // Sync with MCP server
-      const response = await fetch('http://localhost:3001/api/patients', {
+      // Sync with internal API routes
+      const response = await fetch('/api/patients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(patient),
@@ -61,7 +61,7 @@ export const usePatientsPersistent = () => {
       if (response.ok) {
         console.log('Patient synced with server:', patient);
         // Refresh from server to get server-assigned data (direct call, not memoized function)
-        const refreshResponse = await fetch('http://localhost:3001/api/patients');
+        const refreshResponse = await fetch('/api/patients');
         if (refreshResponse.ok) {
           const data = await refreshResponse.json();
           if (data.patients) {
@@ -86,8 +86,8 @@ export const usePatientsPersistent = () => {
       // Update local store immediately for optimistic updates
       store.updatePatient(patientId, updates);
       
-      // Sync with MCP server
-      const response = await fetch(`http://localhost:3001/api/patients/${patientId}`, {
+      // Sync with internal API routes
+      const response = await fetch(`/api/patients/${patientId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
@@ -96,7 +96,7 @@ export const usePatientsPersistent = () => {
       if (response.ok) {
         console.log('Patient updated on server:', patientId, updates);
         // Refresh from server to get updated data (direct call, not memoized function)
-        const refreshResponse = await fetch('http://localhost:3001/api/patients');
+        const refreshResponse = await fetch('/api/patients');
         if (refreshResponse.ok) {
           const data = await refreshResponse.json();
           if (data.patients) {
@@ -127,15 +127,15 @@ export const usePatientsPersistent = () => {
       // Remove from local store immediately for optimistic updates
       store.removePatient(patientId);
       
-      // Sync with MCP server
-      const response = await fetch(`http://localhost:3001/api/patients/${patientId}`, {
+      // Sync with internal API routes
+      const response = await fetch(`/api/patients/${patientId}`, {
         method: 'DELETE',
       });
       
       if (response.ok) {
         console.log('Patient removed from server:', patientId);
         // Refresh from server to ensure consistency (direct call, not memoized function)
-        const refreshResponse = await fetch('http://localhost:3001/api/patients');
+        const refreshResponse = await fetch('/api/patients');
         if (refreshResponse.ok) {
           const data = await refreshResponse.json();
           if (data.patients) {

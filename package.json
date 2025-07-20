@@ -7,22 +7,28 @@
   "main": "electron-main.js",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" next build",
     "start": "next start",
     "lint": "next lint",
     "start:electron": "electron electron-main.js",
     "start-backend": "node mcp-server/server.js",
     "start-frontend": "next start",
     "start:all": "npm run build && concurrently \"npm run start-backend\" \"npm run start-frontend\" \"npm run start:electron\"",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel",
+    "check-size": "node -e \"const fs=require('fs');const path=require('path');function getSize(dir){let size=0;const files=fs.readdirSync(dir);files.forEach(file=>{const filePath=path.join(dir,file);if(fs.statSync(filePath).isDirectory()&&!['node_modules','.git','dist','.next'].includes(file)){size+=getSize(filePath)}else if(fs.statSync(filePath).isFile()&&!file.match(/\\.(log|exe|asar|pack)$/)){size+=fs.statSync(filePath).size}});return size}const size=Math.round(getSize('.')/1024/1024*100)/100;console.log(`📦 Deployable size: ${size} MB`);console.log(size<100?'✅ OK for Vercel':'❌ Too large for Vercel');\""
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@vercel/node": "^5.3.6",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
     "next": "^15.4.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
+    "uuid": "^11.1.0",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
@@ -31,6 +37,7 @@
     "@types/react-dom": "^19.1.6",
     "autoprefixer": "^10.4.20",
     "concurrently": "^9.2.0",
+    "cross-env": "^7.0.3",
     "electron": "^37.2.3",
     "electron-builder": "^26.0.12",
     "postcss": "^8.4.47",
