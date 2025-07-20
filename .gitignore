@@ -13,3 +13,5 @@ node_modules/
 .next/
 .next
 C:\flow-care\.next
+C:\flow-care\dist
+dist

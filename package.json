@@ -2,11 +2,19 @@
   "name": "triage-flow-care",
   "version": "0.1.0",
   "private": true,
+  "description": "TriageFlow Care is a medical triage system app designed to assist healthcare professionals in prioritizing and managing patient care efficiently.",
+  "author": "Clyde Villacrusis and Alicia Yu",
+  "main": "electron-main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "start:electron": "electron electron-main.js",
+    "start-backend": "node mcp-server/server.js",
+    "start-frontend": "next start",
+    "start:all": "npm run build && concurrently \"npm run start-backend\" \"npm run start-frontend\" \"npm run start:electron\"",
+    "dist": "electron-builder"
   },
   "dependencies": {
     "next": "^15.4.2",
@@ -20,8 +28,34 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "autoprefixer": "^10.4.20",
+    "concurrently": "^9.2.0",
+    "electron": "^37.2.3",
+    "electron-builder": "^26.0.12",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.16",
     "typescript": "5.8.3"
+  },
+  "build": {
+    "appId": "com.yourdomain.triageflowcare",
+    "files": [
+      "electron-main.js",
+      "mcp-server/**/*",
+      "node_modules/**/*",
+      "package.json",
+      ".next/**/*",
+      "public/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }
