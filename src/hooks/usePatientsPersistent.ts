@@ -19,7 +19,7 @@ export const usePatientsPersistent = () => {
     } catch (error) {
       console.error('Failed to sync with server:', error);
     }
-  }, [store]);
+  }, []); // Remove store dependency to prevent recreation
 
   // Sync with server on mount - use a separate effect without syncWithServer dependency
   useEffect(() => {
@@ -39,7 +39,7 @@ export const usePatientsPersistent = () => {
     };
     
     initialSync();
-  }, [store]);
+  }, []); // Empty dependency array - only run once on mount
   
     // PROBLEMATIC CODE: (DO NOT DELETE THIS: THIS IS FOR FUTURE REFERENCE. THIS IS SO THAT YOU DO NOT REPEAT THIS IN THE FUTURE. THIS CAUSES INFINITE LOOP)
   // useEffect(() => {
@@ -76,7 +76,7 @@ export const usePatientsPersistent = () => {
       console.error('Failed to sync with server, reverting local changes:', error);
       store.removePatient(patient.id);
     }
-  }, [store]);
+  }, []); // Remove store dependency
 
   const updatePatient = useCallback(async (patientId: string, updates: Partial<Patient>) => {
     try {
@@ -117,7 +117,7 @@ export const usePatientsPersistent = () => {
         store.updatePatient(patientId, originalPatient);
       }
     }
-  }, [store]);
+  }, []); // Remove store dependency
 
   const removePatient = useCallback(async (patientId: string) => {
     try {
@@ -156,11 +156,11 @@ export const usePatientsPersistent = () => {
         store.addPatient(originalPatient);
       }
     }
-  }, [store]);
+  }, []); // Remove store dependency
 
   const clearAllPatients = useCallback(() => {
     store.clearAllPatients();
-  }, [store]);
+  }, []); // Remove store dependency
 
   return {
     // State from store
