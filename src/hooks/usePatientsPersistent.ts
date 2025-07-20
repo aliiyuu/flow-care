@@ -44,7 +44,7 @@ export const usePatientsPersistent = () => {
     // PROBLEMATIC CODE: (DO NOT DELETE THIS: THIS IS FOR FUTURE REFERENCE. THIS IS SO THAT YOU DO NOT REPEAT THIS IN THE FUTURE. THIS CAUSES INFINITE LOOP)
   // useEffect(() => {
   //   syncWithServer();
-  // }, [syncWithServer]); // ❌ This creates an infinite loop
+  // }, [syncWithServer]); // This creates an infinite loop
 
   const addPatient = useCallback(async (patient: Patient) => {
     try {

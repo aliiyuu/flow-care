@@ -207,7 +207,19 @@ const addPatient = useCallback(async (patient: Patient) => {
   }
 }, [store]); // ✅ Only depends on stable store
 
+But FURTHER fixes were made to remove the store dependency from the useEffect hooks, so that they only run once on mount.
 
+The useEffect to run on every render, making continuous API calls
+All the useCallback functions to be recreated on every render
+Key changes made:
+
+Removed store from useEffect dependency array: Changed [store] to [] so the initial sync only runs once on mount
+Removed store from all useCallback dependency arrays: This prevents the functions from being recreated on every render
+This is safe to do with Zustand because:
+
+Zustand store methods are stable and don't change between renders
+The store state updates will still trigger re-renders through the store's subscription mechanism
+We're accessing the store directly in the callback functions, so they'll always use the current store instance
 
 ## Running the Application
 ```bash
