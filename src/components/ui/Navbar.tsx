@@ -16,7 +16,7 @@ export const Navbar: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-1">
-            <Link href="/" className="text-teal-700 hover:text-teal-500 hover:bg-teal-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            <Link href="/dashboard" className="text-teal-700 hover:text-teal-500 hover:bg-teal-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
               Dashboard
             </Link>
             <Link href="/triage" className="text-teal-700 hover:text-teal-500 hover:bg-teal-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
